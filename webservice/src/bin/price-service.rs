@@ -1,17 +1,32 @@
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpServer};
 use std::io;
+use std::sync::Mutex;
 
-pub fn general_routes(cfg: &mut web::ServiceConfig) {
-    cfg.route("/health", web::get().to(health_check_handler));
-}
+#[path = "../handlers.rs"]
+mod handlers;
+#[path = "../models.rs"]
+mod models;
+#[path = "../routers.rs"]
+mod routers;
+#[path = "../state.rs"]
+mod state;
 
-pub async fn health_check_handler() -> impl Responder {
-    HttpResponse::Ok().json("Actix Web Service is running!")
-}
+use routers::*;
+use state::AppState;
 
 #[actix_rt::main]
 async fn main() -> io::Result<()> {
-    let app = move || App::new().configure(general_routes);
+    let shared_data = web::Data::new(AppState {
+        health_check_response: "I'm OK.".to_string(),
+        visit_count: Mutex::new(0),
+        courses: Mutex::new(vec![]),
+    });
+    let app = move || {
+        App::new()
+            .app_data(shared_data.clone())
+            .configure(general_routes)
+            .configure(course_routes)
+    };
 
     HttpServer::new(app).bind("127.0.0.1:8080")?.run().await
 }

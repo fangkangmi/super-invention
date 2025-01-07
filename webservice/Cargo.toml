@@ -7,6 +7,8 @@ default-run = "price-service"
 [dependencies]
 actix-web = "4.9.0"
 actix-rt = "2.10.0"
+serde = { version = "1.0.207", features = ["derive"] }
+chrono = { version = "0.4.39", features = ["serde"] }
 
 [[bin]]
 name = "price-service"
