@@ -10,6 +10,20 @@ pub async fn health_check_handler(app_state: web::Data<AppState>) -> HttpRespons
     HttpResponse::Ok().json(&response)
 }
 
+use super::models::Claims;
+pub async fn get_price(claims: web::Json<Claims>, app_state: web::Data<AppState>) -> HttpResponse {
+    println!("Received new price request");
+    let mut claims = claims.into_inner();
+    let price = if claims.vat_incl {
+        claims.quantity * 120
+    } else {8/
+        claims.quantity * 100
+    };
+    claims.item = format!("{} price is {}", claims.item, price);0
+    app_state.claims.lock().unwrap().push(claims);
+    HttpResponse::Ok().json("Price calculated")
+}
+
 use super::models::Course;
 use chrono::Utc;
 pub async fn new_course(
@@ -98,6 +112,7 @@ mod tests {
             health_check_response: "".to_string(),
             visit_count: Mutex::new(0),
             courses: Mutex::new(vec![]),
+            claims: Mutex::new(vec![]),
         });
         let resp = new_course(course, app_state).await;
         assert_eq!(resp.status(), StatusCode::OK);
@@ -109,6 +124,7 @@ mod tests {
             health_check_response: "".to_string(),
             visit_count: Mutex::new(0),
             courses: Mutex::new(vec![]),
+            claims: Mutex::new(vec![]),
         });
         let teacher_id: web::Path<usize> = web::Path::from(1);
         let resp = get_courses_for_teacher(app_state, teacher_id).await;
@@ -121,6 +137,7 @@ mod tests {
             health_check_response: "".to_string(),
             visit_count: Mutex::new(0),
             courses: Mutex::new(vec![]),
+            claims: Mutex::new(vec![]),
         });
         let params: web::Path<(usize, usize)> = web::Path::from((1, 1));
         let resp = get_course_detail(app_state, params).await;

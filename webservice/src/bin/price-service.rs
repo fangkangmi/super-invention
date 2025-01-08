@@ -20,6 +20,7 @@ async fn main() -> io::Result<()> {
         health_check_response: "I'm OK.".to_string(),
         visit_count: Mutex::new(0),
         courses: Mutex::new(vec![]),
+        claims: Mutex::new(vec![]),
     });
     let app = move || {
         App::new()

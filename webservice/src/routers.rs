@@ -12,3 +12,10 @@ pub fn course_routes(cfg: &mut web::ServiceConfig) {
             .route("/{user_id}/{course_id}", web::get().to(get_course_detail)),
     );
 }
+
+pub fn price_routes(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/api").
+        route("/price", web::get().to(get_price))
+    );
+}
